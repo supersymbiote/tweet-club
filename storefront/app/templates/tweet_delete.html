@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Tweet Club
+{% endblock %}
+
+{% block content %}
+
+<h1 style="color:rgb(180, 180, 180); text-align:center; margin-top: 30px">Are you Sure?</h1>
+<form method="post">
+    {% csrf_token%}
+    <button class="btn btn-danger">Delete</button>
+    <a class="btn btn-sucess" herf="{% url 'tweet_list' %}">Cancel</a>
+</form>
+{% endblock %}

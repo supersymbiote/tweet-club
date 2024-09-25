@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Tweet Club
+{% endblock %}
+
+{% block content %}
+
+<h1 style="color:rgb(180, 180, 180); text-align:center; margin-top: 30px">Happy Tweeting</h1>
+
+<!-- Include CSRF token here -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+<a class="btn btn-primary mb-4" href="{% url 'tweet_create' %}">Add an Item</a>
+{% if tweets %}
+<div class="container row gap=-1">
+    {% for tweet in tweets %}
+    <div id="tweet-{{ tweet.id }}" class="card" style="width: 27rem; margin: 1rem;">
+        <img src="{{tweet.photo.url}}" class="card-img-top" alt="...">
+        <div class="card-body">
+            <h5 class="card-title">{{tweet.user.username}}</h5>
+            <p class="card-text">{{tweet.text}}</p>
+            {% if tweet.user == user %}
+            <a href="{% url 'tweet_edit' tweet.id%}" class="btn btn-danger">Edit</a>
+            <button class="btn btn-danger" onclick="confirmDelete('{{ tweet.id }}')">Delete</button>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+{% if query %}
+  <p>No results found for your search: "{{ query }}".</p>
+{% else %}
+  <p>No tweets available.</p>
+{% endif %}
+{% endif %}
+
+<script>
+  function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+
+  const csrfToken = getCookie('csrftoken');  // Get the CSRF token from cookies
+
+  function confirmDelete(tweetId) {
+      if (confirm("Are you sure you want to delete this tweet?")) {
+          deleteTweet(tweetId);
+      }
+  }
+
+  function deleteTweet(tweetId) {
+      fetch(`${tweetId}/delete/`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken,
+              'X-Requested-With': 'XMLHttpRequest'  // This identifies the request as AJAX
+          }
+      })
+      .then(response => {
+          if (response.ok) {
+              document.getElementById(`tweet-${tweetId}`).remove();  // Remove the tweet from the UI
+              alert('Tweet deleted successfully.');
+          } else {
+              return response.json().then(data => {
+                  throw new Error(data.error || 'Failed to delete tweet.');
+              });
+          }
+      })
+      .catch(error => {
+          alert(`Error: ${error.message}`);
+      });
+  }
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,169 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <title>
+        {% block title %}
+        Tweet Club
+        {% endblock %}
+    </title>
+<style>
+    body.dark-mode {
+      background-color: #121212;
+      color: white;
+  }
+  
+  body.light-mode {
+      background-color: white;
+      color: black;
+  }
+  
+  .toggle {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+  }
+  
+  .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+  }
+  
+  .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #e2e2e2;
+      transition: .4s;
+      border-radius: 34px;
+  }
+  
+  .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: rgb(45, 94, 228);
+      transition: .4s;
+      border-radius: 50%;
+  }
+ 
+  input:checked + .slider {
+      background-color: #000000;
+  }
+  
+  input:checked + .slider:before {
+      transform: translateX(26px);
+  }
+  
+  /* Dark mode styles for the navbar */
+  body.dark-mode .navbar {
+      background-color: #1f1f1f; /* Darker background for navbar */
+      color: white; /* Change text color to white */
+  }
+  body.light-mode .navbar {
+      background-color: #ffffff; /* Darker background for navbar */
+      color: rgb(15, 15, 15); /* Change text color to white */
+  }
+  
+  body.dark-mode .navbar .nav-link {
+      color: #ffffff; /* Ensure nav links are visible */
+  }
+  
+  body.dark-mode .navbar .nav-link.active {
+      color: #0d6efd; /* Adjust active link color if needed */
+  }
+  
+  /* Dark mode styles for cards */
+  body.dark-mode .card {
+      background-color: #2c2c2c; /* Dark card background */
+      color: #ffffff; /* Light text for cards */
+  }
+  body.light-mode .card {
+      background-color: #ececec; /* Dark card background */
+      color: #000000; /* Light text for cards */
+  }
+</style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="{% url 'tweet_list'%}">Tweet Club</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'tweet_list'%}">Home</a>
+              </li>
+            </ul>
+            <form class="d-flex" role="search" method="get" action="{% url 'tweet_list' %}">
+              {% csrf_token%}
+              <input class="form-control me-2" type="search" placeholder="Search tweets" aria-label="Search" name="q" value="{{ request.GET.q }}">
+              <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+            <label class="toggle mx-3">
+              <input type="checkbox" id="dark-mode-toggle">
+              <span class="slider"></span>
+            </label>
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'logout' %}">
+            {% csrf_token%}
+            <button class="btn btn-danger" type="submit">Logout</button>
+            </form>
+            {% else %}
+            <a href="{% url 'register' %}" class="btn btn-primary mx-2">Register</a>
+            <a href="{% url 'login' %}" class="btn btn-success mx-2">Login</a>
+            {% endif %}
+          </div>
+        </div>
+      </nav>
+    <div class = "container">
+        {% block content %}
+        {% endblock %}
+    </div>
+<script>
+function applyDarkMode() {
+    const darkMode = localStorage.getItem('darkMode') === 'true';
+    const toggle = document.getElementById('dark-mode-toggle');
+    
+    if (darkMode) {
+        document.body.classList.add('dark-mode');
+        document.body.classList.remove('light-mode');
+        toggle.checked = true; // Set the toggle to checked
+    } else {
+        document.body.classList.add('light-mode');
+        document.body.classList.remove('dark-mode');
+        toggle.checked = false; // Set the toggle to unchecked
+    }
+}
+
+// Event listener for the toggle button
+document.getElementById('dark-mode-toggle').addEventListener('change', function() {
+    if (this.checked) {
+        document.body.classList.add('dark-mode');
+        document.body.classList.remove('light-mode');
+        localStorage.setItem('darkMode', 'true'); // Save preference
+    } else {
+        document.body.classList.add('light-mode');
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('darkMode', 'false'); // Save preference
+    }
+});
+
+// Apply the dark mode on page load
+applyDarkMode();
+</script>
+</body>
+</html>
